@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QR • NaviMatch</title>
+  <meta name="description" content="Escanea el QR para abrir el formulario NaviMatch. Navidad & Amor.">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+
+  <style>
+    html,body{height:100%}
+    body{
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(255,220,200,.08), transparent 60%),
+        radial-gradient(1200px 600px at 110% 10%, rgba(255,240,220,.08), transparent 60%),
+        linear-gradient(135deg,#7f1d1d 0%,#a11f24 35%,#b91c1c 65%,#7f1d1d 100%);
+      color:#111827;
+    }
+
+    .candy{position:relative;overflow:visible}
+    .candy:before{
+      content:"";position:absolute;inset:-8px;z-index:1;border-radius:28px;padding:8px;
+      background:repeating-linear-gradient(45deg,#dc2626 0 12px,#ffffff 12px 24px);
+      -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+      -webkit-mask-composite:xor;mask-composite:exclude;
+      animation:candySpin 16s linear infinite;background-size:240px 240px;pointer-events:none
+    }
+    @keyframes candySpin{0%{background-position:0 0}100%{background-position:240px 0}}
+
+    #qrWrap{position:relative}
+    #qrWrap canvas{image-rendering:crisp-edges;image-rendering:-webkit-optimize-contrast}
+
+    .qr-shell{position:relative}
+    .qr-card{position:relative;z-index:10}
+    header{z-index:20}
+
+    /* ===== Contenedor exacto del QR ===== */
+    .qr-stage{position:relative; margin:0 auto}
+
+    /* ===== Overlay del logo (centrado absoluto dentro del QR) ===== */
+    .logo-overlay{
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      pointer-events:none; z-index:5;
+    }
+    .logo-box{
+      background:#fff; border-radius:18px; box-shadow:0 8px 30px -10px rgba(0,0,0,.25);
+      display:flex; align-items:center; justify-content:center; overflow:hidden; padding:0;
+    }
+    .logo-box svg, .logo-box img{display:block; width:100%; height:100%}
+  </style>
+</head>
+<body class="h-full relative">
+  <header class="relative sticky top-0">
+    <div class="max-w-xl mx-auto px-4 py-4 flex items-center justify-center gap-2 text-white">
+      <img src="logo.svg" alt="Logo NaviMatch" class="w-7 h-7 object-contain drop-shadow" />
+      <h1 class="text-lg font-semibold drop-shadow">NaviMatch</h1>
+      <span class="ml-2 text-sm opacity-90">Especial Navidad</span>
+    </div>
+  </header>
+
+  <div class="relative z-10 h-[calc(100%-72px)] grid place-items-center p-6">
+    <div class="qr-shell">
+      <div class="relative p-[2px] rounded-[2.3rem] bg-gradient-to-br from-red-300/60 via-white to-amber-200/70 shadow-[0_24px_80px_-24px_rgba(0,0,0,0.35)] candy">
+        <div class="rounded-[2.1rem] bg-white/95 backdrop-blur-xl ring-1 ring-black/5 p-6 sm:p-8 qr-card">
+          <div id="qrWrap" class="relative rounded-3xl bg-white p-3 border border-red-100 shadow-sm"></div>
+          <div class="mt-5 text-center">
+            <p class="text-sm text-red-700 font-medium">Escanéame para abrir el formulario ❤️</p>
+            <p class="text-xs text-red-600/80 mt-1">¡Feliz Navidad y mucho amor! 🎄</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DARK = '#b10000';
+    const HEART_TINT = '#e11d2e';
+    const LIGHT = '#ffffff';
+    const ENABLE_CENTER_LOGO = true;
+    const LOGO_SRC = 'logo.svg';
+    const LOGO_FORCE_COLOR = DARK;
+    const HEART_SCALE_BASE = 0.92;
+    const HEART_SCALE_TOP  = 0.78;
+    const MARGIN_MODULES   = 6;
+    const ECC_LEVEL        = 'H';
+
+    function drawHeart(ctx, cx, cy, s){
+      const w=s, h=s;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy + h*0.25);
+      ctx.bezierCurveTo(cx, cy, cx - w*0.5, cy, cx - w*0.5, cy + h*0.25);
+      ctx.bezierCurveTo(cx - w*0.5, cy + h*0.55, cx - w*0.15, cy + h*0.72, cx, cy + h*0.95);
+      ctx.bezierCurveTo(cx + w*0.15, cy + h*0.72, cx + w*0.5, cy + h*0.55, cx + w*0.5, cy + h*0.25);
+      ctx.bezierCurveTo(cx + w*0.5, cy, cx, cy, cx, cy + h*0.25);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function roundRect(ctx,x,y,w,h,r){
+      const rr=Math.min(r,w/2,h/2);
+      ctx.beginPath(); ctx.moveTo(x+rr,y);
+      ctx.arcTo(x+w,y,x+w,y+h,rr);
+      ctx.arcTo(x+w,y+h,x,y+h,rr);
+      ctx.arcTo(x,y+h,x,y,rr);
+      ctx.arcTo(x,y,x+w,y,rr);
+      ctx.closePath();
+    }
+
+    async function insertLogoOverlay(stageEl, cell, count){
+      const centerW = Math.floor(count*0.22);
+      const logoBoxPx = Math.floor(cell*centerW);
+      const pad = Math.floor(logoBoxPx*0.22);
+      const innerSize = logoBoxPx - pad;
+      const overlay = document.createElement('div');
+      overlay.className = 'logo-overlay';
+      const box = document.createElement('div');
+      box.className = 'logo-box';
+      box.style.width  = logoBoxPx + 'px';
+      box.style.height = logoBoxPx + 'px';
+      try{
+        const res = await fetch(LOGO_SRC);
+        let svgText = await res.text();
+        svgText = svgText.replace(/<svg([^>]*)>/i,
+          (m,attrs)=>`<svg${attrs}><style>*{fill:${LOGO_FORCE_COLOR}!important;stroke:${LOGO_FORCE_COLOR}!important}</style>`);
+        box.innerHTML = svgText;
+        const svg = box.querySelector('svg');
+        if(svg){
+          svg.style.width = innerSize + 'px';
+          svg.style.height = innerSize + 'px';
+        }
+      }catch(e){
+        const img = new Image();
+        img.src = LOGO_SRC;
+        img.style.width = innerSize + 'px';
+        img.style.height = innerSize + 'px';
+        img.style.filter = 'invert(15%) sepia(98%) saturate(6100%) hue-rotate(350deg) brightness(90%) contrast(105%)';
+        box.appendChild(img);
+      }
+      overlay.appendChild(box);
+      stageEl.appendChild(overlay);
+    }
+
+    function pintarQRHearts(text){
+      const wrap=document.getElementById('qrWrap');
+      wrap.innerHTML='';
+      const qr=qrcode(0, ECC_LEVEL);
+      qr.addData(text);
+      qr.make();
+      const count=qr.getModuleCount();
+      const isDark=(r,c)=>qr.isDark(r,c);
+      const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+      const target=Math.min(560,Math.max(360,Math.floor(Math.min(innerWidth,innerHeight)*0.6)));
+      const cell=Math.floor(target/(count+MARGIN_MODULES*2));
+      const marginPx=cell*MARGIN_MODULES;
+      const sizeCss=cell*count+marginPx*2;
+      const sizePx=Math.round(sizeCss*dpr);
+      const stage=document.createElement('div');
+      stage.className='qr-stage';
+      stage.style.width=sizeCss+'px';
+      stage.style.height=sizeCss+'px';
+      wrap.appendChild(stage);
+      const canvas=document.createElement('canvas');
+      canvas.width=canvas.height=sizePx;
+      canvas.style.width=canvas.style.height=sizeCss+'px';
+      canvas.className='rounded-3xl shadow-[0_10px_40px_-12px_rgba(0,0,0,.35)]';
+      stage.appendChild(canvas);
+      const ctx=canvas.getContext('2d');
+      ctx.scale(dpr,dpr);
+      ctx.fillStyle=LIGHT;
+      ctx.fillRect(0,0,sizeCss,sizeCss);
+      const centerW=Math.floor(count*0.20);
+      const centerX=Math.floor((count-centerW)/2);
+      const inCenter=(r,c)=>ENABLE_CENTER_LOGO && r>=centerX && r<centerX+centerW && c>=centerX && c<centerX+centerW;
+      for(let r=0;r<count;r++){
+        for(let c=0;c<count;c++){
+          if(!isDark(r,c)||inCenter(r,c))continue;
+          const cx=marginPx+c*cell+cell/2,cy=marginPx+r*cell+cell/2;
+          ctx.fillStyle=DARK;drawHeart(ctx,cx,cy,cell*HEART_SCALE_BASE);
+          ctx.fillStyle=HEART_TINT;drawHeart(ctx,cx,cy,cell*HEART_SCALE_TOP);
+        }
+      }
+      const eyes=[{r:0,c:0},{r:0,c:count-7},{r:count-7,c:0}];
+      eyes.forEach(({r,c})=>{
+        const x=marginPx+c*cell,y=marginPx+r*cell,s=cell*7;
+        ctx.fillStyle=LIGHT;roundRect(ctx,x,y,s,s,cell*1.4);ctx.fill();
+        ctx.fillStyle=DARK;roundRect(ctx,x,y,s,s,cell*0.6);ctx.fill();
+        const i2=x+cell,j2=y+cell,s2=cell*5;
+        ctx.fillStyle=LIGHT;roundRect(ctx,i2,j2,s2,s2,cell*0.6);ctx.fill();
+        const i3=x+cell*2,j3=y+cell*2,s3=cell*3;
+        ctx.fillStyle=DARK;roundRect(ctx,i3,j3,s3,s3,cell*0.4);ctx.fill();
+      });
+      if(ENABLE_CENTER_LOGO){insertLogoOverlay(stage,cell,count);}
+      const link=document.createElement('a');
+      link.href=text;link.textContent='Abrir enlace';
+      link.className='block text-center mt-3 font-medium text-red-700 hover:underline';
+      link.rel='noopener';link.target='_blank';
+      wrap.appendChild(link);
+    }
+
+    function construirURLObjetivo(){
+      try{
+        const loc=location;
+        if(loc.protocol==='http:'||loc.protocol==='https:'){
+          const base=loc.origin+loc.pathname.replace(/[^\/]*$/,'');
+          const url=new URL('form.html',base);
+          url.searchParams.set('access','qr');
+          return url.toString();
+        }
+      }catch(_){}
+      const placeholder=new URL('http://192.168.1.215:8080/form.html');
+      placeholder.searchParams.set('access','qr');
+      return placeholder.toString();
+    }
+
+    (function init(){
+      const objetivo=construirURLObjetivo();
+      pintarQRHearts(objetivo);
+      addEventListener('resize',()=>pintarQRHearts(objetivo),{passive:true});
+    })();
+  </script>
+</body>
+</html>

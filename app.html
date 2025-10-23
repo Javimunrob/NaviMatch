@@ -1,0 +1,274 @@
+<!-- ===============
+FILE: app.html (Romántico, móvil tipo app de citas)
+=============== -->
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tring • Descubrir</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html,body{height:100%}
+    .like-burst{position:absolute; inset:0; pointer-events:none}
+    .burst{position:absolute; font-size:18px; opacity:0; transform:translate(-50%,-50%) scale(.6); animation:pop .9s ease forwards}
+    @keyframes pop{10%{opacity:1; transform:translate(-50%,-50%) scale(1)} 100%{opacity:0; transform:translate(-50%,-140%) scale(1.4)}}
+    .card-enter{animation:cardIn .35s ease both}
+    @keyframes cardIn{from{opacity:0; transform:translateY(12px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)}}
+    .card-like{animation:swipeRight .35s ease forwards}
+    .card-nope{animation:swipeLeft .35s ease forwards}
+    @keyframes swipeRight{to{transform:translate(60%, -10%) rotate(12deg); opacity:0}}
+    @keyframes swipeLeft{to{transform:translate(-60%, -10%) rotate(-12deg); opacity:0}}
+    /* Fondo romántico con orbes suaves y ligera animación */
+    body{ 
+      background:
+        radial-gradient(1200px 800px at 8% 0%, #ffe4e6 0%, transparent 60%), /* rose-100 */
+        radial-gradient(1000px 700px at 100% 15%, #fef3c7 0%, transparent 55%), /* amber-100 */
+        radial-gradient(900px 700px at 0% 100%, #e9d5ff 0%, transparent 55%), /* violet-100 */
+        linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+    }
+    body::before{
+      content:""; position:fixed; inset:-10%; z-index:-1; pointer-events:none;
+      background:
+        radial-gradient(600px 420px at 70% 80%, rgba(244,114,182,.18), transparent 60%),
+        radial-gradient(520px 520px at 30% 30%, rgba(251,191,36,.16), transparent 60%),
+        radial-gradient(420px 420px at 80% 20%, rgba(167,139,250,.16), transparent 60%);
+      filter: blur(18px);
+      animation: drift 28s ease-in-out infinite alternate;
+    }
+    @keyframes drift{ from{ transform:translateY(0px)} to{ transform:translateY(18px)} }
+</style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-rose-50 via-white to-amber-50">
+  <!-- Topbar -->
+  <header class="sticky top-0 z-20 px-4 py-3 flex items-center justify-between bg-white/70 backdrop-blur border-b border-zinc-200">
+    <div class="flex items-center gap-2">
+      <span class="text-xl">💖</span>
+      <span class="font-semibold">Tring</span>
+    </div>
+    <a id="profileChip" href="form.html" class="flex items-center gap-2 px-2 py-1 rounded-full bg-white/90 ring-1 ring-black/5 hover:ring-amber-300">
+      <div id="chipAvatar" class="w-8 h-8 rounded-full bg-amber-200 grid place-items-center text-sm ring-1 ring-black/10">?</div>
+      <span id="chipName" class="text-sm text-zinc-700">Tu perfil</span>
+    </a>
+  </header>
+
+  <!-- Contenido -->
+  <main class="max-w-md mx-auto p-4 pb-24">
+    <!-- Filtros rápidos -->
+    <section class="mb-3 flex flex-wrap items-center gap-2">
+      <select id="fSexo" class="rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm"><option value="">Sexo: todos</option><option>Hombre</option><option>Mujer</option><option>Otro</option></select>
+      <select id="fOri" class="rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm"><option value="">Ori.: todas</option><option>Heterosexual</option><option>Gay</option><option>Lesbiana</option><option>Bisexual</option><option>Pansexual</option><option>Prefiero no decirlo</option><option>Otra</option></select>
+      <input id="fTexto" class="rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm flex-1" placeholder="Buscar…"/>
+    </section>
+
+    <!-- Stack de tarjeta actual -->
+    <section id="stackWrap" class="relative">
+      <div id="cardArea"></div>
+      <div class="like-burst" id="likeBurst"></div>
+      <p id="emptyMsg" class="hidden text-center text-zinc-500 mt-10">No hay más perfiles con esos filtros.</p>
+    </section>
+
+    <!-- Botonera tipo app -->
+    <section class="mt-4 grid grid-cols-3 gap-3">
+      <button id="btnNope" class="h-12 rounded-full bg-white ring-1 ring-black/5 shadow active:translate-y-[1px]">🙅‍♀️</button>
+      <button id="btnLike" class="h-12 rounded-full bg-amber-500 text-white shadow-lg hover:bg-amber-600 active:translate-y-[1px]">💘 Me gusta</button>
+      <button id="btnMsg" class="h-12 rounded-full bg-white ring-1 ring-black/5 shadow active:translate-y-[1px]">✉️</button>
+    </section>
+  </main>
+
+  <!-- Nav inferior -->
+  <nav class="fixed bottom-0 left-0 right-0 z-20 bg-white/80 backdrop-blur border-t">
+    <div class="max-w-md mx-auto grid grid-cols-3 text-sm">
+      <a class="py-3 text-center text-rose-500 font-medium">Descubrir</a>
+      <a id="navLikes" class="py-3 text-center text-zinc-500 hover:text-zinc-700">Likes</a>
+      <a id="navMsgs" class="py-3 text-center text-zinc-500 hover:text-zinc-700">Mensajes</a>
+    </div>
+  </nav>
+
+  <template id="cardTpl">
+    <article class="card-enter relative rounded-3xl overflow-hidden bg-white shadow-xl ring-1 ring-black/5">
+      <div class="relative aspect-[4/5] bg-zinc-100">
+        <img class="w-full h-full object-cover"/>
+        <div class="absolute inset-x-0 bottom-0 p-4 pt-16 bg-gradient-to-t from-black/70 via-black/30 to-transparent text-white">
+          <h3 class="text-xl font-semibold"><span class="nombre"></span> <span class="opacity-80 text-base">• <span class="edad"></span></span></h3>
+          <p class="text-xs opacity-90 mt-0.5"><span class="orientacion"></span> • <span class="altura"></span> cm • <span class="peso"></span> kg</p>
+          <div class="flex flex-wrap gap-2 mt-2 intereses"></div>
+        </div>
+        <div class="absolute top-3 left-3 px-2 py-1 text-xs rounded-full bg-rose-500 text-white/95 shadow">Nuevo</div>
+      </div>
+    </article>
+  </template>
+
+  <script>
+    // ====== Storage helpers (compat iOS) ======
+    const storage={get(k){try{return localStorage.getItem(k)}catch(e){try{return sessionStorage.getItem(k)}catch(_){return null}}},set(k,v){try{localStorage.setItem(k,v)}catch(e){try{sessionStorage.setItem(k,v)}catch(_){}}}};
+    function getProfiles(){ try{ return JSON.parse(storage.get('ppx_profiles')||'[]'); }catch{ return []; } }
+    function setProfiles(list){ storage.set('ppx_profiles', JSON.stringify(list)); }
+    function getCurrentUser(){ try{ return JSON.parse(storage.get('ppx_current_user')||'null'); }catch{ return null; } }
+
+    // ====== Seed demo si no hay nada ======
+    const demoProfiles=[
+      {id:'d1', nombre:'Alex', edad:28, sexo:'Hombre', orientacion:'Heterosexual', altura:178, peso:75, intereses:['cine','pádel','viajes'], foto:'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=900&auto=format&fit=crop&ixlib=rb-4.0.3', createdAt:Date.now()-86400000*2},
+      {id:'d2', nombre:'Marta', edad:31, sexo:'Mujer', orientacion:'Bisexual', altura:165, peso:60, intereses:['yoga','series','brunch'], foto:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=900&auto=format&fit=crop&ixlib=rb-4.0.3', createdAt:Date.now()-86400000*4},
+      {id:'d3', nombre:'Sam', edad:26, sexo:'Otro', orientacion:'Pansexual', altura:172, peso:68, intereses:['arte','museos','café'], foto:'https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=900&auto=format&fit=crop&ixlib=rb-4.0.3', createdAt:Date.now()-86400000}
+    ];
+    (function seed(){ const list=getProfiles(); if(list.length===0){ setProfiles(demoProfiles); }})();
+
+    // ====== Estado ======
+    const likesKey='ppx_likes';
+    function getLikes(){ try{ return JSON.parse(storage.get(likesKey)||'[]'); }catch{ return []; } }
+    function setLikes(x){ storage.set(likesKey, JSON.stringify(x)); }
+
+    const cardArea=document.getElementById('cardArea');
+    const empty=document.getElementById('emptyMsg');
+    const tpl=document.getElementById('cardTpl');
+    const fSexo=document.getElementById('fSexo');
+    const fOri=document.getElementById('fOri');
+    const fTexto=document.getElementById('fTexto');
+
+    let idx=0, list=[];
+
+    function profileChip(){
+      const u=getCurrentUser();
+      const av=document.getElementById('chipAvatar');
+      const nm=document.getElementById('chipName');
+      if(!u){ av.textContent='?'; nm.textContent='Tu perfil'; return; }
+      if(u.foto){ av.innerHTML='<img src="'+u.foto+'" class="w-8 h-8 rounded-full object-cover"/>'; } else { av.textContent=(u.nombre||'?')[0]?.toUpperCase()||'?'; }
+      nm.textContent=(u.nombre||'Tu perfil') + (u.edad? ' • '+u.edad: '');
+    }
+
+    function applyFilters(){
+      const u=getCurrentUser();
+      const sexo=fSexo.value, ori=fOri.value, txt=fTexto.value.trim().toLowerCase();
+      list=getProfiles();
+      if(u) list=list.filter(p=> p.nombre!==u.nombre);
+      if(sexo) list=list.filter(p=>p.sexo===sexo);
+      if(ori) list=list.filter(p=>p.orientacion===ori);
+      if(txt) list=list.filter(p=> (p.nombre||'').toLowerCase().includes(txt) || (p.intereses||[]).join(',').toLowerCase().includes(txt) );
+      idx=0;
+      renderCurrent();
+    }
+
+    function renderCurrent(){
+      cardArea.innerHTML='';
+      if(!list || list.length===0 || idx>=list.length){ empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      const p=list[idx];
+      const node=tpl.content.cloneNode(true);
+      const img=node.querySelector('img'); img.src=p.foto||'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=900&auto=format&fit=crop&ixlib=rb-4.0.3';
+      node.querySelector('.nombre').textContent=p.nombre||'';
+      node.querySelector('.edad').textContent=p.edad||'';
+      node.querySelector('.orientacion').textContent=p.orientacion||'';
+      node.querySelector('.altura').textContent=p.altura||'-';
+      node.querySelector('.peso').textContent=p.peso||'-';
+      const chips=node.querySelector('.intereses');
+      (p.intereses||[]).forEach(it=>{ const span=document.createElement('span'); span.className='text-xs px-2 py-1 rounded-lg bg-white/80 text-zinc-900'; span.textContent=it; chips.appendChild(span); });
+      cardArea.appendChild(node);
+    }
+
+    function likeBurst(){
+      const wrap=document.getElementById('likeBurst');
+      wrap.innerHTML='';
+      const hearts=Array.from({length:8},(_,i)=> i);
+      hearts.forEach(()=>{
+        const s=document.createElement('div');
+        s.className='burst'; s.textContent='❤';
+        s.style.left=(50 + (Math.random()*40-20))+'%';
+        s.style.top=(60 + (Math.random()*10-5))+'%';
+        wrap.appendChild(s);
+        setTimeout(()=> s.remove(), 900);
+      });
+    }
+
+    function swipe(nextAnim){
+      const card=cardArea.querySelector('article');
+      if(!card) return;
+      card.classList.add(nextAnim);
+      setTimeout(()=>{ idx++; renderCurrent(); }, 320);
+    }
+
+    // Botones
+    document.getElementById('btnLike').addEventListener('click', ()=>{
+      const p=list[idx]; if(!p) return; likeBurst();
+      const l=getLikes(); if(!l.includes(p.id)) { l.push(p.id); setLikes(l); }
+      swipe('card-like');
+    });
+    document.getElementById('btnNope').addEventListener('click', ()=> swipe('card-nope'));
+    document.getElementById('btnMsg').addEventListener('click', ()=>{
+      const p=list[idx]; if(!p) return; alert('✉️ Mensaje a '+p.nombre+' (demo)');
+    });
+
+    // Filtros
+    [fSexo,fOri,fTexto].forEach(el=> el.addEventListener('input', applyFilters));
+
+    // Navegación inferior (demos)
+    document.getElementById('navLikes').addEventListener('click', ()=>{
+      const l=getLikes();
+      if(l.length===0){ alert('Aún no tienes likes. Pulsa 💘 en alguien que te guste.'); return; }
+      alert('Te gustan: '+ getProfiles().filter(p=> l.includes(p.id)).map(p=> p.nombre).join(', '));
+    });
+    document.getElementById('navMsgs').addEventListener('click', ()=> alert('Mensajes (demo)'));
+
+    // === Perfil inline (drawer) ===
+    function openProfile(){ document.getElementById('profileDrawer').classList.remove('hidden'); }
+    function closeProfile(){ document.getElementById('profileDrawer').classList.add('hidden'); }
+    function setCurrentUser(u){ storage.set('ppx_current_user', JSON.stringify(u)); }
+
+    function hydrateDrawer(){
+      const u=getCurrentUser()||{};
+      const f=document.getElementById('drawerForm');
+      f.nombre.value=u.nombre||''; f.edad.value=u.edad||''; f.foto.value=u.foto||''; f.orientacion.value=u.orientacion||'';
+      // sexo
+      [...f.querySelectorAll('input[name="sexo"]')].forEach(r=>{ r.checked = (u.sexo===r.value); if(r.checked){ r.nextElementSibling.classList.add('bg-amber-500','text-white','shadow'); } else { r.nextElementSibling.classList.remove('bg-amber-500','text-white','shadow'); }});
+      // intereses
+      f.intereses.value = Array.isArray(u.intereses)? u.intereses.join(', ') : (u.intereses||'');
+    }
+
+    document.getElementById('profileChip').addEventListener('click', function(e){ e.preventDefault(); hydrateDrawer(); openProfile(); });
+    document.getElementById('drawerBackdrop').addEventListener('click', closeProfile);
+    document.getElementById('closeDrawer').addEventListener('click', closeProfile);
+    document.getElementById('drawerCancel').addEventListener('click', closeProfile);
+
+    document.getElementById('drawerForm').addEventListener('change', function(ev){
+      if(ev.target.matches('.seg input')){
+        const span=ev.target.nextElementSibling;
+        [...document.querySelectorAll('#drawerForm .seg input')].forEach(x=> x.nextElementSibling.classList.remove('bg-amber-500','text-white','shadow'));
+        if(ev.target.checked){ span.classList.add('bg-amber-500','text-white','shadow'); }
+      }
+    });
+
+    document.getElementById('drawerForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const f=e.target; const u=getCurrentUser()||{};
+      const intereses=(f.intereses.value||'').split(',').map(s=>s.trim()).filter(Boolean);
+      const data={
+        id: u.id || String(Date.now()),
+        nombre: (f.nombre.value||'').trim(),
+        edad: Number(f.edad.value||0),
+        sexo: f.querySelector('input[name="sexo"]:checked')?.value || '',
+        orientacion: f.orientacion.value||'',
+        altura: u.altura||0,
+        peso: u.peso||0,
+        intereses,
+        foto: (f.foto.value||'').trim(),
+        createdAt: u.createdAt || Date.now()
+      };
+      if(!data.nombre || !data.edad || data.edad<18 || !data.sexo || !data.orientacion){ alert('Completa nombre, edad (≥18), sexo y orientación.'); return; }
+      setCurrentUser(data);
+      // Actualiza lista
+      const arr=getProfiles();
+      const i=arr.findIndex(p=> p.id===data.id || p.nombre===data.nombre);
+      if(i>=0) arr[i]=data; else arr.push(data);
+      setProfiles(arr);
+      profileChip();
+      applyFilters();
+      closeProfile();
+    });
+
+    // Init
+    profileChip();
+    applyFilters();
+  </script>
+</body>
+</html>

@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NaviMatch • Formulario</title>
+
+  <!-- Favicon -->
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* ===== Fondo navideño rojo ===== */
+    body{
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(255, 220, 200, .08), transparent 60%),
+        radial-gradient(1200px 600px at 110% 10%, rgba(255, 240, 220, .08), transparent 60%),
+        linear-gradient(135deg, #7f1d1d 0%, #a11f24 35%, #b91c1c 65%, #7f1d1d 100%);
+      color:#1f2937;
+    }
+
+    /* Capas decorativas SIN interacción */
+    .bokeh, .snow, .twinkle, .heart { pointer-events: none; }
+
+    /* Bokeh estático */
+    .bokeh{
+      position:fixed;inset:0;z-index:0;
+      background-image:
+        radial-gradient(80px 80px at 10% 20%, rgba(255,255,255,.09), transparent 60%),
+        radial-gradient(60px 60px at 80% 10%, rgba(255,230,180,.12), transparent 60%),
+        radial-gradient(90px 90px at 70% 75%, rgba(255,200,200,.10), transparent 60%),
+        radial-gradient(70px 70px at 25% 85%, rgba(255,255,220,.10), transparent 60%);
+      mix-blend-mode:screen;
+    }
+
+    /* Nieve */
+    .snow{
+      position:fixed;inset:0;z-index:1;opacity:.7;
+      background-image:
+        radial-gradient(2px 2px at 20% 10%, rgba(255,255,255,.9) 50%, transparent 51%),
+        radial-gradient(2px 2px at 80% 20%, rgba(255,255,255,.8) 50%, transparent 51%),
+        radial-gradient(2px 2px at 40% 60%, rgba(255,255,255,.85) 50%, transparent 51%),
+        radial-gradient(2px 2px at 70% 80%, rgba(255,255,255,.8) 50%, transparent 51%),
+        radial-gradient(1.6px 1.6px at 50% 40%, rgba(255,255,255,.8) 50%, transparent 51%);
+      background-size:300px 300px,400px 400px,500px 500px,600px 600px,450px 450px;
+      animation:snowMove 22s linear infinite;
+    }
+    @keyframes snowMove{
+      from{background-position:0 0,0 0,0 0,0 0,0 0}
+      to{background-position:0 600px,0 800px,0 900px,0 1200px,0 700px}
+    }
+
+    /* Twinkle: destellos */
+    .twinkle{
+      position:fixed;inset:0;z-index:2;
+      background-image:
+        radial-gradient(2px 2px at 15% 25%, rgba(255,255,255,.8) 50%, transparent 51%),
+        radial-gradient(2px 2px at 35% 75%, rgba(255,255,200,.9) 50%, transparent 51%),
+        radial-gradient(2px 2px at 65% 35%, rgba(255,220,220,.9) 50%, transparent 51%),
+        radial-gradient(2px 2px at 85% 60%, rgba(255,255,255,.8) 50%, transparent 51%),
+        radial-gradient(2px 2px at 50% 10%, rgba(255,240,200,.9) 50%, transparent 51%),
+        radial-gradient(2px 2px at 25% 55%, rgba(255,255,255,.9) 50%, transparent 51%);
+      animation:twinkle 3.2s ease-in-out infinite alternate;
+      opacity:.8; mix-blend-mode:screen;
+    }
+    @keyframes twinkle{
+      0%{opacity:.25; filter:brightness(1)}
+      50%{opacity:.7;  filter:brightness(1.2)}
+      100%{opacity:.35; filter:brightness(1.05)}
+    }
+
+    .garland{position:relative;isolation:isolate}
+    .garland:before{
+      content:"";position:absolute;inset:-1px 0 auto 0;height:10px;z-index:-1;
+      background:repeating-linear-gradient(90deg, rgba(0,0,0,.08), rgba(0,0,0,.08) 2px, transparent 2px, transparent 6px);
+      filter:blur(8px);opacity:.25;
+    }
+
+    /* Radios tipo pastilla */
+    .seg input:checked + span{
+      background:linear-gradient(135deg,#dc2626,#b91c1c);
+      color:#fff;border-color:transparent;box-shadow:0 8px 20px rgba(220,38,38,.35);
+    }
+
+    /* Tarjeta + halo */
+    .card{
+      background:rgba(255,255,255,.97);
+      box-shadow:0 20px 45px rgba(153,27,27,.22);
+      border:1px solid rgba(120,30,30,.12);
+      position:relative;
+    }
+    .card-halo{
+      background:conic-gradient(from 210deg, rgba(255,215,160,.25), transparent 25%, rgba(255,255,255,0), rgba(255,200,180,.2), transparent 70%);
+      filter:blur(10px);opacity:.75; pointer-events:none;
+    }
+
+    /* Marco “Candy Cane” animado (no bloquea) */
+    .candy{position:relative}
+    .candy:before{
+      content:"";position:absolute;inset:-6px;z-index:2;border-radius:24px;
+      padding:6px;
+      background:repeating-linear-gradient(45deg,#dc2626 0 12px,#ffffff 12px 24px);
+      -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite:xor; mask-composite:exclude;
+      animation:candySpin 16s linear infinite;
+      background-size: 240px 240px;
+      pointer-events:none;
+    }
+    @keyframes candySpin{
+      0%{background-position:0 0}
+      100%{background-position:240px 0}
+    }
+
+    /* ===== Marca de agua ROJA (más arriba) ===== */
+    .wm-card{ position:relative; }
+    .wm-card::after{
+      content:"";
+      position:absolute; inset:0;
+      /* subimos un poco más el logo: 35% */
+      -webkit-mask-image: url('logo.svg');
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-size: 280px;
+      -webkit-mask-position: center 35%;
+              mask-image: url('logo.svg');
+              mask-repeat: no-repeat;
+              mask-size: 280px;
+              mask-position: center 35%;
+      background: rgba(220,38,38,.12);
+      pointer-events:none; z-index:0;
+    }
+    .wm-content{ position:relative; z-index:1; }
+
+    /* Botón principal + glow suave */
+    .btn-primary{
+      background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;
+      box-shadow:0 10px 24px rgba(185,28,28,.35);
+    }
+    .btn-primary:hover{filter:brightness(1.03);transform:translateY(-1px)}
+    .btn-primary:active{transform:translateY(0)}
+    .btn-glow{position:relative}
+    .btn-glow:before{
+      content:"";position:absolute;inset:-6px;border-radius:20px;z-index:-1;
+      background:radial-gradient(120px 40px at 50% 50%, rgba(245,158,11,.28), transparent 70%);
+      filter:blur(8px);opacity:.9;
+      animation:glowPulse 2.8s ease-in-out infinite;
+      pointer-events:none;
+    }
+    @keyframes glowPulse{
+      0%{opacity:.6; transform:scale(1)}
+      50%{opacity:.95; transform:scale(1.02)}
+      100%{opacity:.6; transform:scale(1)}
+    }
+
+    /* Corazones flotantes (no bloquean interacción) */
+    .heart{
+      pointer-events:none;
+      position:fixed;bottom:-24px;
+      width:16px;height:16px;transform:rotate(45deg);
+      background:rgba(220,38,38,.9);
+      box-shadow:0 0 10px rgba(220,38,38,.5);
+      z-index:3;opacity:.9;
+      animation:floatUp var(--dur,6s) linear forwards;
+    }
+    .heart:before,.heart:after{
+      content:"";position:absolute;width:16px;height:16px;border-radius:50%;
+      background:inherit;box-shadow:inherit;
+    }
+    .heart:before{left:-8px;top:0}
+    .heart:after{left:0;top:-8px}
+    @keyframes floatUp{
+      0%{transform:translateY(0) rotate(45deg) scale(var(--s,1))}
+      100%{transform:translateY(-120vh) rotate(45deg) scale(var(--s,1))}
+    }
+
+    /* Logo en cabecera */
+    .logo { width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(220,38,38,.25)); }
+
+    /* Mejoras móviles */
+    input,select,textarea,button{-webkit-tap-highlight-color:transparent}
+  </style>
+</head>
+<body class="min-h-screen text-zinc-800 relative">
+  <div class="bokeh"></div>
+  <div class="snow"></div>
+  <div class="twinkle"></div>
+
+  <!-- Cabecera -->
+  <header class="garland relative z-10 sticky top-0 backdrop-blur bg-white/80 border-b border-red-200">
+    <div class="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <!-- LOGO -->
+        <img src="logo.svg" alt="Logo NaviMatch" class="logo" />
+        <h1 class="text-lg font-semibold tracking-tight text-zinc-900">NaviMatch</h1>
+      </div>
+      <span class="text-sm text-red-700 font-medium">Especial Navidad</span>
+    </div>
+  </header>
+
+  <!-- Contenido -->
+  <main class="relative z-10 max-w-xl mx-auto p-4 pb-28">
+    <form id="naviForm" class="space-y-6">
+      <!-- Tarjeta con halo + candy + marca de agua roja (más alta) -->
+      <section class="relative rounded-3xl p-6 card candy wm-card">
+        <div class="pointer-events-none absolute -inset-px rounded-3xl card-halo"></div>
+        <div class="relative space-y-6 wm-content">
+
+          <!-- Nombre + Edad -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <label class="block sm:col-span-2">
+              <span class="text-xs text-zinc-600">Nombre</span>
+              <input name="nombre" required autocomplete="name" placeholder="Tu nombre"
+                class="mt-1 w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition">
+            </label>
+            <label class="block">
+              <span class="text-xs text-zinc-600">Edad</span>
+              <input name="edad" type="number" min="18" max="100" required placeholder="18+"
+                class="mt-1 w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition">
+            </label>
+          </div>
+
+          <!-- Preferencia -->
+          <div>
+            <span class="text-xs text-zinc-600">Preferencia</span>
+            <div class="seg mt-2 grid grid-cols-3 gap-2">
+              <label class="relative"><input class="sr-only" type="radio" name="preferencia" value="Hombre" required><span class="block text-center rounded-xl border border-red-100 py-2">Hombre</span></label>
+              <label class="relative"><input class="sr-only" type="radio" name="preferencia" value="Mujer"><span class="block text-center rounded-xl border border-red-100 py-2">Mujer</span></label>
+              <label class="relative"><input class="sr-only" type="radio" name="preferencia" value="Ambas"><span class="block text-center rounded-xl border border-red-100 py-2">Ambas</span></label>
+            </div>
+          </div>
+
+          <!-- ¿Qué buscas? -->
+          <div>
+            <span class="text-xs text-zinc-600">¿Qué buscas?</span>
+            <div class="seg mt-2 grid grid-cols-3 gap-2">
+              <label class="relative"><input class="sr-only" type="radio" name="buscas" value="Amistad" required><span class="block text-center rounded-xl border border-red-100 py-2">Amistad</span></label>
+              <label class="relative"><input class="sr-only" type="radio" name="buscas" value="Rollo"><span class="block text-center rounded-xl border border-red-100 py-2">Rollo</span></label>
+              <label class="relative"><input class="sr-only" type="radio" name="buscas" value="Pareja"><span class="block text-center rounded-xl border border-red-100 py-2">Pareja</span></label>
+            </div>
+          </div>
+
+          <!-- ¿Cómo te definirías? -->
+          <label class="block">
+            <span class="text-xs text-zinc-600">¿Cómo te definirías?</span>
+            <textarea name="definicion" rows="3" placeholder="Breve descripción sobre ti"
+              class="mt-1 w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition"></textarea>
+          </label>
+
+          <!-- ¿Qué estudias? -->
+          <label class="block">
+            <span class="text-xs text-zinc-600">¿Qué estudias?</span>
+            <input name="estudios" placeholder="Tu formación o a qué te dedicas"
+              class="mt-1 w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition">
+          </label>
+
+          <!-- Algo que añadir (Preferencias) -->
+          <label class="block">
+            <span class="text-xs text-zinc-600">Algo que añadir (Preferencias)</span>
+            <textarea name="preferencias" rows="3" placeholder="Planes ideales, límites, lenguaje del amor…"
+              class="mt-1 w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition"></textarea>
+          </label>
+
+          <!-- ¿Le has echado el ojo a alguien? -->
+          <label class="block">
+            <span class="text-xs text-zinc-600">¿Le has echado el ojo a alguien?</span>
+            <input name="crush" placeholder="Nombre o pista 😉"
+              class="mt-1 w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition">
+          </label>
+
+          <!-- Hobbies: campo normal -->
+          <label class="block">
+            <span class="text-xs text-zinc-600">Hobbies</span>
+            <textarea name="hobbies" rows="3" placeholder="Escribe libremente tus hobbies"
+              class="mt-1 w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition"></textarea>
+          </label>
+
+        </div>
+      </section>
+
+      <p class="text-xs text-red-50/90 leading-relaxed px-1 text-center">
+        Tus respuestas se guardan <b>solo en este dispositivo</b> (localStorage). Puedes editarlas más tarde.
+      </p>
+    </form>
+  </main>
+
+  <!-- Footer (SIN marca de agua ni logo en el botón) -->
+  <footer class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur border-t border-red-200 z-10">
+    <div class="max-w-xl mx-auto">
+      <div class="btn-glow">
+        <button form="naviForm" type="submit"
+          class="btn-primary w-full h-12 rounded-2xl font-semibold">
+          Enviar respuestas
+        </button>
+      </div>
+      <div class="mt-3 text-center text-sm text-red-100">
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-red-600/70 to-red-700/70 text-white shadow">
+          Feliz Navidad
+        </span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Storage con fallback =====
+    const storage = {
+      get(k){ try { return localStorage.getItem(k); } catch { try { return sessionStorage.getItem(k); } catch { return null; } } },
+      set(k,v){ try { localStorage.setItem(k,v); } catch { try { sessionStorage.setItem(k,v); } catch {} } }
+    };
+
+    // ===== Segmented UI (radios) =====
+    document.querySelectorAll('.seg input').forEach(r=>{
+      const pill = r.nextElementSibling;
+      r.addEventListener('change', ()=>{
+        [...r.closest('.seg').querySelectorAll('input')].forEach(x => x.nextElementSibling.classList.remove('ring-2','ring-red-300'));
+        if (r.checked) pill.classList.add('ring-2','ring-red-300');
+      });
+    });
+
+    // ===== Corazones flotantes (máx 8, sin interferir) =====
+    const MAX_HEARTS = 8;
+    let hearts = 0;
+    function spawnHeart(){
+      if(hearts >= MAX_HEARTS) return;
+      hearts++;
+      const h = document.createElement('div');
+      h.className = 'heart';
+      const left = Math.random()*100;
+      const scale = 0.7 + Math.random()*0.9;
+      const dur = 5 + Math.random()*4;
+      h.style.left = left+'vw';
+      h.style.setProperty('--s', scale);
+      h.style.setProperty('--dur', dur+'s');
+      document.body.appendChild(h);
+      setTimeout(()=>{ h.remove(); hearts--; }, dur*1000 + 50);
+    }
+    setInterval(spawnHeart, 2800);
+
+    // ===== Prefill =====
+    (function prefill(){
+      const raw = storage.get('navimatch_respuestas');
+      if(!raw) return;
+      let data; try { data = JSON.parse(raw); } catch { return; }
+      const f = document.getElementById('naviForm');
+      if(!f || !data) return;
+
+      const setV = (name, value) => {
+        const el = f.elements[name];
+        if(!el) return;
+        if(el instanceof RadioNodeList){
+          [...el].forEach(r => r.checked = r.value === value);
+          [...el].forEach(r => r.dispatchEvent(new Event('change')));
+        } else {
+          el.value = value ?? '';
+        }
+      };
+
+      setV('nombre', data.nombre);
+      setV('edad', data.edad);
+      setV('preferencia', data.preferencia);
+      setV('buscas', data.buscas);
+      setV('definicion', data.definicion);
+      setV('estudios', data.estudios);
+      setV('preferencias', data.preferencias);
+      setV('crush', data.crush);
+      setV('hobbies', Array.isArray(data.hobbies) ? data.hobbies.join(', ') : (data.hobbies || ''));
+    })();
+
+    // ===== Envío con redirección a app.html =====
+    document.getElementById('naviForm').addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const fd = new FormData(e.target);
+
+      const nombre = (fd.get('nombre')||'').toString().trim();
+      const edad = Number(fd.get('edad'));
+      if(!nombre){ alert('Pon un nombre'); return; }
+      if(!edad || edad < 18){ alert('Debes ser mayor de 18'); return; }
+      if(!fd.get('preferencia')){ alert('Selecciona tu preferencia'); return; }
+      if(!fd.get('buscas')){ alert('Selecciona qué buscas'); return; }
+
+      const data = {
+        nombre,
+        edad,
+        preferencia: fd.get('preferencia'),
+        buscas: fd.get('buscas'),
+        definicion: (fd.get('definicion')||'').toString().trim(),
+        estudios: (fd.get('estudios')||'').toString().trim(),
+        preferencias: (fd.get('preferencias')||'').toString().trim(),
+        crush: (fd.get('crush')||'').toString().trim(),
+        hobbies: (fd.get('hobbies')||'').toString().trim(),
+        createdAt: Date.now()
+      };
+
+      try { storage.set('navimatch_respuestas', JSON.stringify(data)); } catch(_) {}
+      window.location.href = 'app.html';
+    });
+  </script>
+</body>
+</html>
