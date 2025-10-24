@@ -90,10 +90,6 @@
       border:1px solid rgba(120,30,30,.12);
       position:relative;
     }
-    .card-halo{
-      background:conic-gradient(from 210deg, rgba(255,215,160,.25), transparent 25%, rgba(255,255,255,0), rgba(255,200,180,.2), transparent 70%);
-      filter:blur(10px);opacity:.75; pointer-events:none;
-    }
 
     /* Marco “Candy Cane” animado (no bloquea) */
     .candy{position:relative}
@@ -112,25 +108,6 @@
       100%{background-position:240px 0}
     }
 
-    /* ===== Marca de agua ROJA (más arriba) ===== */
-    .wm-card{ position:relative; }
-    .wm-card::after{
-      content:"";
-      position:absolute; inset:0;
-      /* subimos un poco más el logo: 35% */
-      -webkit-mask-image: url('logo.svg');
-      -webkit-mask-repeat: no-repeat;
-      -webkit-mask-size: 280px;
-      -webkit-mask-position: center 35%;
-              mask-image: url('logo.svg');
-              mask-repeat: no-repeat;
-              mask-size: 280px;
-              mask-position: center 35%;
-      background: rgba(220,38,38,.12);
-      pointer-events:none; z-index:0;
-    }
-    .wm-content{ position:relative; z-index:1; }
-
     /* Botón principal + glow suave */
     .btn-primary{
       background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;
@@ -138,19 +115,6 @@
     }
     .btn-primary:hover{filter:brightness(1.03);transform:translateY(-1px)}
     .btn-primary:active{transform:translateY(0)}
-    .btn-glow{position:relative}
-    .btn-glow:before{
-      content:"";position:absolute;inset:-6px;border-radius:20px;z-index:-1;
-      background:radial-gradient(120px 40px at 50% 50%, rgba(245,158,11,.28), transparent 70%);
-      filter:blur(8px);opacity:.9;
-      animation:glowPulse 2.8s ease-in-out infinite;
-      pointer-events:none;
-    }
-    @keyframes glowPulse{
-      0%{opacity:.6; transform:scale(1)}
-      50%{opacity:.95; transform:scale(1.02)}
-      100%{opacity:.6; transform:scale(1)}
-    }
 
     /* Corazones flotantes (no bloquean interacción) */
     .heart{
@@ -200,10 +164,9 @@
   <!-- Contenido -->
   <main class="relative z-10 max-w-xl mx-auto p-4 pb-28">
     <form id="naviForm" class="space-y-6">
-      <!-- Tarjeta con halo + candy + marca de agua roja (más alta) -->
-      <section class="relative rounded-3xl p-6 card candy wm-card">
-        <div class="pointer-events-none absolute -inset-px rounded-3xl card-halo"></div>
-        <div class="relative space-y-6 wm-content">
+      <!-- Tarjeta con candy -->
+      <section class="relative rounded-3xl p-6 card candy">
+        <div class="relative space-y-6">
 
           <!-- Nombre + Edad -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -278,20 +241,17 @@
       </section>
 
       <p class="text-xs text-red-50/90 leading-relaxed px-1 text-center">
-        Tus respuestas se guardan <b>solo en este dispositivo</b> (localStorage). Puedes editarlas más tarde.
+        Tus respuestas se envían por email y <b>además</b> se guardan <b>solo</b> en este dispositivo (localStorage).
       </p>
     </form>
   </main>
 
-  <!-- Footer (SIN marca de agua ni logo en el botón) -->
+  <!-- Footer -->
   <footer class="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur border-t border-red-200 z-10">
     <div class="max-w-xl mx-auto">
-      <div class="btn-glow">
-        <button form="naviForm" type="submit"
-          class="btn-primary w-full h-12 rounded-2xl font-semibold">
-          Enviar respuestas
-        </button>
-      </div>
+      <button form="naviForm" type="submit" id="submitBtn" class="btn-primary w-full h-12 rounded-2xl font-semibold">
+        Enviar respuestas
+      </button>
       <div class="mt-3 text-center text-sm text-red-100">
         <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-red-600/70 to-red-700/70 text-white shadow">
           Feliz Navidad
@@ -301,20 +261,8 @@
   </footer>
 
   <script>
-    // ===== Storage con fallback =====
-    const storage = {
-      get(k){ try { return localStorage.getItem(k); } catch { try { return sessionStorage.getItem(k); } catch { return null; } } },
-      set(k,v){ try { localStorage.setItem(k,v); } catch { try { sessionStorage.setItem(k,v); } catch {} } }
-    };
-
-    // ===== Segmented UI (radios) =====
-    document.querySelectorAll('.seg input').forEach(r=>{
-      const pill = r.nextElementSibling;
-      r.addEventListener('change', ()=>{
-        [...r.closest('.seg').querySelectorAll('input')].forEach(x => x.nextElementSibling.classList.remove('ring-2','ring-red-300'));
-        if (r.checked) pill.classList.add('ring-2','ring-red-300');
-      });
-    });
+    /* ================== CONFIG: tu Apps Script ================== */
+    const AS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwiPNqnbXNjpAdJclskBE6_C4S1PiXmNqOC0Xn2FNP3Zrfe_TW3pQZm7cITbr3JNqxw/exec';
 
     // ===== Corazones flotantes (máx 8, sin interferir) =====
     const MAX_HEARTS = 8;
@@ -335,43 +283,27 @@
     }
     setInterval(spawnHeart, 2800);
 
-    // ===== Prefill =====
-    (function prefill(){
-      const raw = storage.get('navimatch_respuestas');
-      if(!raw) return;
-      let data; try { data = JSON.parse(raw); } catch { return; }
-      const f = document.getElementById('naviForm');
-      if(!f || !data) return;
+    // ===== Pills visuales para radios =====
+    document.querySelectorAll('.seg input').forEach(r=>{
+      const pill = r.nextElementSibling;
+      r.addEventListener('change', ()=>{
+        [...r.closest('.seg').querySelectorAll('input')].forEach(x => x.nextElementSibling.classList.remove('ring-2','ring-red-300'));
+        if (r.checked) pill.classList.add('ring-2','ring-red-300');
+      });
+    });
 
-      const setV = (name, value) => {
-        const el = f.elements[name];
-        if(!el) return;
-        if(el instanceof RadioNodeList){
-          [...el].forEach(r => r.checked = r.value === value);
-          [...el].forEach(r => r.dispatchEvent(new Event('change')));
-        } else {
-          el.value = value ?? '';
-        }
-      };
+    // ===== Helpers =====
+    function saveLocal(key, obj){
+      try{ localStorage.setItem(key, JSON.stringify(obj)); }catch(_){}
+    }
 
-      setV('nombre', data.nombre);
-      setV('edad', data.edad);
-      setV('preferencia', data.preferencia);
-      setV('buscas', data.buscas);
-      setV('definicion', data.definicion);
-      setV('estudios', data.estudios);
-      setV('preferencias', data.preferencias);
-      setV('crush', data.crush);
-      setV('hobbies', Array.isArray(data.hobbies) ? data.hobbies.join(', ') : (data.hobbies || ''));
-    })();
-
-    // ===== Envío con redirección a app.html =====
-    document.getElementById('naviForm').addEventListener('submit', (e)=>{
+    // ===== Envío (validación + POST a Apps Script) =====
+    document.getElementById('naviForm').addEventListener('submit', async (e)=>{
       e.preventDefault();
       const fd = new FormData(e.target);
 
       const nombre = (fd.get('nombre')||'').toString().trim();
-      const edad = Number(fd.get('edad'));
+      const edad   = Number(fd.get('edad'));
       if(!nombre){ alert('Pon un nombre'); return; }
       if(!edad || edad < 18){ alert('Debes ser mayor de 18'); return; }
       if(!fd.get('preferencia')){ alert('Selecciona tu preferencia'); return; }
@@ -390,8 +322,29 @@
         createdAt: Date.now()
       };
 
-      try { storage.set('navimatch_respuestas', JSON.stringify(data)); } catch(_) {}
-      window.location.href = 'app.html';
+      // Guarda local (opcional)
+      saveLocal('navimatch_respuestas', data);
+
+      const btn = document.getElementById('submitBtn');
+      if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
+
+      try{
+        const res = await fetch(AS_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify(data)
+        });
+        const json = await res.json().catch(()=>({}));
+        if (!res.ok || !json.ok) throw new Error(json.error || 'Error en envío');
+
+        if (btn) btn.textContent = '¡Enviado!';
+        // Redirigir después del envío (ajusta si quieres)
+        setTimeout(()=>{ window.location.href = 'app.html'; }, 900);
+      }catch(err){
+        console.error(err);
+        alert('No se pudo enviar el correo ahora. Inténtalo de nuevo en unos minutos.');
+        if (btn) { btn.disabled = false; btn.textContent = 'Enviar respuestas'; }
+      }
     });
   </script>
 </body>
