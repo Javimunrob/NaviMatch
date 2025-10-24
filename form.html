@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>NaviMatch • Formulario</title>
-
-  <!-- Favicon -->
   <link rel="icon" href="logo.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -20,141 +18,54 @@
       color:#1f2937;
     }
 
-    /* Capas decorativas SIN interacción */
-    .bokeh, .snow, .twinkle, .heart { pointer-events: none; }
-
-    /* Bokeh estático */
-    .bokeh{
-      position:fixed;inset:0;z-index:0;
-      background-image:
-        radial-gradient(80px 80px at 10% 20%, rgba(255,255,255,.09), transparent 60%),
-        radial-gradient(60px 60px at 80% 10%, rgba(255,230,180,.12), transparent 60%),
-        radial-gradient(90px 90px at 70% 75%, rgba(255,200,200,.10), transparent 60%),
-        radial-gradient(70px 70px at 25% 85%, rgba(255,255,220,.10), transparent 60%);
-      mix-blend-mode:screen;
-    }
-
-    /* Nieve */
-    .snow{
-      position:fixed;inset:0;z-index:1;opacity:.7;
-      background-image:
-        radial-gradient(2px 2px at 20% 10%, rgba(255,255,255,.9) 50%, transparent 51%),
-        radial-gradient(2px 2px at 80% 20%, rgba(255,255,255,.8) 50%, transparent 51%),
-        radial-gradient(2px 2px at 40% 60%, rgba(255,255,255,.85) 50%, transparent 51%),
-        radial-gradient(2px 2px at 70% 80%, rgba(255,255,255,.8) 50%, transparent 51%),
-        radial-gradient(1.6px 1.6px at 50% 40%, rgba(255,255,255,.8) 50%, transparent 51%);
-      background-size:300px 300px,400px 400px,500px 500px,600px 600px,450px 450px;
-      animation:snowMove 22s linear infinite;
-    }
-    @keyframes snowMove{
-      from{background-position:0 0,0 0,0 0,0 0,0 0}
-      to{background-position:0 600px,0 800px,0 900px,0 1200px,0 700px}
-    }
-
-    /* Twinkle: destellos */
-    .twinkle{
-      position:fixed;inset:0;z-index:2;
-      background-image:
-        radial-gradient(2px 2px at 15% 25%, rgba(255,255,255,.8) 50%, transparent 51%),
-        radial-gradient(2px 2px at 35% 75%, rgba(255,255,200,.9) 50%, transparent 51%),
-        radial-gradient(2px 2px at 65% 35%, rgba(255,220,220,.9) 50%, transparent 51%),
-        radial-gradient(2px 2px at 85% 60%, rgba(255,255,255,.8) 50%, transparent 51%),
-        radial-gradient(2px 2px at 50% 10%, rgba(255,240,200,.9) 50%, transparent 51%),
-        radial-gradient(2px 2px at 25% 55%, rgba(255,255,255,.9) 50%, transparent 51%);
-      animation:twinkle 3.2s ease-in-out infinite alternate;
-      opacity:.8; mix-blend-mode:screen;
-    }
-    @keyframes twinkle{
-      0%{opacity:.25; filter:brightness(1)}
-      50%{opacity:.7;  filter:brightness(1.2)}
-      100%{opacity:.35; filter:brightness(1.05)}
-    }
-
-    .garland{position:relative;isolation:isolate}
-    .garland:before{
-      content:"";position:absolute;inset:-1px 0 auto 0;height:10px;z-index:-1;
-      background:repeating-linear-gradient(90deg, rgba(0,0,0,.08), rgba(0,0,0,.08) 2px, transparent 2px, transparent 6px);
-      filter:blur(8px);opacity:.25;
-    }
-
-    /* Radios tipo pastilla */
-    .seg input:checked + span{
-      background:linear-gradient(135deg,#dc2626,#b91c1c);
-      color:#fff;border-color:transparent;box-shadow:0 8px 20px rgba(220,38,38,.35);
-    }
-
-    /* Tarjeta + halo */
+    /* ===== Tarjeta ===== */
     .card{
       background:rgba(255,255,255,.97);
       box-shadow:0 20px 45px rgba(153,27,27,.22);
       border:1px solid rgba(120,30,30,.12);
       position:relative;
+      border-radius:1.5rem;
     }
 
-    /* Marco “Candy Cane” animado (no bloquea) */
-    .candy{position:relative}
-    .candy:before{
-      content:"";position:absolute;inset:-6px;z-index:2;border-radius:24px;
-      padding:6px;
-      background:repeating-linear-gradient(45deg,#dc2626 0 12px,#ffffff 12px 24px);
-      -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-      -webkit-mask-composite:xor; mask-composite:exclude;
-      animation:candySpin 16s linear infinite;
-      background-size: 240px 240px;
-      pointer-events:none;
-    }
-    @keyframes candySpin{
-      0%{background-position:0 0}
-      100%{background-position:240px 0}
-    }
-
-    /* Botón principal + glow suave */
+    /* ===== Botón principal ===== */
     .btn-primary{
-      background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;
-      box-shadow:0 10px 24px rgba(185,28,28,.35);
+      background:linear-gradient(135deg,#b91c1c,#dc2626);
+      color:#fff; box-shadow:0 10px 24px rgba(185,28,28,.35);
     }
     .btn-primary:hover{filter:brightness(1.03);transform:translateY(-1px)}
     .btn-primary:active{transform:translateY(0)}
 
-    /* Corazones flotantes (no bloquean interacción) */
-    .heart{
-      pointer-events:none;
-      position:fixed;bottom:-24px;
-      width:16px;height:16px;transform:rotate(45deg);
-      background:rgba(220,38,38,.9);
-      box-shadow:0 0 10px rgba(220,38,38,.5);
-      z-index:3;opacity:.9;
-      animation:floatUp var(--dur,6s) linear forwards;
+    /* ===== Segmented control accesible (móvil/desktop) ===== */
+    .seg{ display:grid; grid-template-columns: repeat(3, 1fr); gap:.5rem; }
+    .seg label{
+      position:relative; cursor:pointer; -webkit-tap-highlight-color:transparent; touch-action:manipulation;
     }
-    .heart:before,.heart:after{
-      content:"";position:absolute;width:16px;height:16px;border-radius:50%;
-      background:inherit;box-shadow:inherit;
+    .seg input{
+      position:absolute; inset:0; width:100%; height:100%;
+      opacity:0; appearance:none; /* recibe el tap/click */
     }
-    .heart:before{left:-8px;top:0}
-    .heart:after{left:0;top:-8px}
-    @keyframes floatUp{
-      0%{transform:translateY(0) rotate(45deg) scale(var(--s,1))}
-      100%{transform:translateY(-120vh) rotate(45deg) scale(var(--s,1))}
+    .seg span{
+      display:block; text-align:center; border-radius:0.75rem;
+      border:1px solid #fecaca; padding:.65rem .75rem; user-select:none;
+      transition: all .18s ease; background:#fff;
     }
-
-    /* Logo en cabecera */
-    .logo { width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 0 6px rgba(220,38,38,.25)); }
+    .seg input:focus-visible + span{ outline:2px solid #fca5a5; outline-offset:2px; }
+    .seg input:active + span{ transform: translateY(1px); }
+    .seg input:checked + span{
+      background:linear-gradient(135deg,#dc2626,#b91c1c);
+      color:#fff; border-color:transparent; box-shadow:0 8px 20px rgba(220,38,38,.35);
+    }
 
     /* Mejoras móviles */
     input,select,textarea,button{-webkit-tap-highlight-color:transparent}
   </style>
 </head>
 <body class="min-h-screen text-zinc-800 relative">
-  <div class="bokeh"></div>
-  <div class="snow"></div>
-  <div class="twinkle"></div>
-
   <!-- Cabecera -->
-  <header class="garland relative z-10 sticky top-0 backdrop-blur bg-white/80 border-b border-red-200">
+  <header class="relative z-10 sticky top-0 backdrop-blur bg-white/80 border-b border-red-200">
     <div class="max-w-xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <!-- LOGO -->
-        <img src="logo.svg" alt="Logo NaviMatch" class="logo" />
+        <img src="logo.svg" alt="Logo NaviMatch" class="w-7 h-7 object-contain" />
         <h1 class="text-lg font-semibold tracking-tight text-zinc-900">NaviMatch</h1>
       </div>
       <span class="text-sm text-red-700 font-medium">Especial Navidad</span>
@@ -164,9 +75,8 @@
   <!-- Contenido -->
   <main class="relative z-10 max-w-xl mx-auto p-4 pb-28">
     <form id="naviForm" class="space-y-6">
-      <!-- Tarjeta con candy -->
-      <section class="relative rounded-3xl p-6 card candy">
-        <div class="relative space-y-6">
+      <section class="card p-6">
+        <div class="space-y-6">
 
           <!-- Nombre + Edad -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -185,20 +95,38 @@
           <!-- Preferencia -->
           <div>
             <span class="text-xs text-zinc-600">Preferencia</span>
-            <div class="seg mt-2 grid grid-cols-3 gap-2">
-              <label class="relative"><input class="sr-only" type="radio" name="preferencia" value="Hombre" required><span class="block text-center rounded-xl border border-red-100 py-2">Hombre</span></label>
-              <label class="relative"><input class="sr-only" type="radio" name="preferencia" value="Mujer"><span class="block text-center rounded-xl border border-red-100 py-2">Mujer</span></label>
-              <label class="relative"><input class="sr-only" type="radio" name="preferencia" value="Ambas"><span class="block text-center rounded-xl border border-red-100 py-2">Ambas</span></label>
+            <div class="seg mt-2">
+              <label>
+                <input type="radio" name="preferencia" value="Hombre" required>
+                <span>Hombre</span>
+              </label>
+              <label>
+                <input type="radio" name="preferencia" value="Mujer">
+                <span>Mujer</span>
+              </label>
+              <label>
+                <input type="radio" name="preferencia" value="Ambas">
+                <span>Ambas</span>
+              </label>
             </div>
           </div>
 
           <!-- ¿Qué buscas? -->
           <div>
             <span class="text-xs text-zinc-600">¿Qué buscas?</span>
-            <div class="seg mt-2 grid grid-cols-3 gap-2">
-              <label class="relative"><input class="sr-only" type="radio" name="buscas" value="Amistad" required><span class="block text-center rounded-xl border border-red-100 py-2">Amistad</span></label>
-              <label class="relative"><input class="sr-only" type="radio" name="buscas" value="Rollo"><span class="block text-center rounded-xl border border-red-100 py-2">Rollo</span></label>
-              <label class="relative"><input class="sr-only" type="radio" name="buscas" value="Pareja"><span class="block text-center rounded-xl border border-red-100 py-2">Pareja</span></label>
+            <div class="seg mt-2">
+              <label>
+                <input type="radio" name="buscas" value="Amistad" required>
+                <span>Amistad</span>
+              </label>
+              <label>
+                <input type="radio" name="buscas" value="Rollo">
+                <span>Rollo</span>
+              </label>
+              <label>
+                <input type="radio" name="buscas" value="Pareja">
+                <span>Pareja</span>
+              </label>
             </div>
           </div>
 
@@ -230,18 +158,22 @@
               class="mt-1 w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition">
           </label>
 
-          <!-- Hobbies: campo normal -->
+          <!-- Hobbies -->
           <label class="block">
             <span class="text-xs text-zinc-600">Hobbies</span>
             <textarea name="hobbies" rows="3" placeholder="Escribe libremente tus hobbies"
               class="mt-1 w-full rounded-2xl border border-red-100 bg-white px-4 py-3 text-base placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-red-200 focus:border-red-500 transition"></textarea>
           </label>
-
         </div>
       </section>
 
-      <p class="text-xs text-red-50/90 leading-relaxed px-1 text-center">
-        Tus respuestas se envían por email y <b>además</b> se guardan <b>solo</b> en este dispositivo (localStorage).
+      <p class="text-xs text-center text-white/90">
+        Tus respuestas se enviarán por email y se guardarán solo en este dispositivo. 💌
+      </p>
+
+      <!-- Mensaje de éxito -->
+      <p id="okMsg" class="hidden mt-2 text-center text-green-700">
+        ✅ ¡Tus respuestas se han enviado! Revisa tu correo.
       </p>
     </form>
   </main>
@@ -252,98 +184,62 @@
       <button form="naviForm" type="submit" id="submitBtn" class="btn-primary w-full h-12 rounded-2xl font-semibold">
         Enviar respuestas
       </button>
-      <div class="mt-3 text-center text-sm text-red-100">
-        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-red-600/70 to-red-700/70 text-white shadow">
-          Feliz Navidad
-        </span>
+      <div class="mt-3 text-center text-sm text-red-600">
+        🎄 Feliz Navidad y mucho amor ❤️
       </div>
     </div>
   </footer>
 
   <script>
-    /* ================== CONFIG: tu Apps Script ================== */
+    /* === Config: tu Apps Script === */
     const AS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbwiPNqnbXNjpAdJclskBE6_C4S1PiXmNqOC0Xn2FNP3Zrfe_TW3pQZm7cITbr3JNqxw/exec';
 
-    // ===== Corazones flotantes (máx 8, sin interferir) =====
-    const MAX_HEARTS = 8;
-    let hearts = 0;
-    function spawnHeart(){
-      if(hearts >= MAX_HEARTS) return;
-      hearts++;
-      const h = document.createElement('div');
-      h.className = 'heart';
-      const left = Math.random()*100;
-      const scale = 0.7 + Math.random()*0.9;
-      const dur = 5 + Math.random()*4;
-      h.style.left = left+'vw';
-      h.style.setProperty('--s', scale);
-      h.style.setProperty('--dur', dur+'s');
-      document.body.appendChild(h);
-      setTimeout(()=>{ h.remove(); hearts--; }, dur*1000 + 50);
-    }
-    setInterval(spawnHeart, 2800);
-
-    // ===== Pills visuales para radios =====
-    document.querySelectorAll('.seg input').forEach(r=>{
-      const pill = r.nextElementSibling;
-      r.addEventListener('change', ()=>{
-        [...r.closest('.seg').querySelectorAll('input')].forEach(x => x.nextElementSibling.classList.remove('ring-2','ring-red-300'));
-        if (r.checked) pill.classList.add('ring-2','ring-red-300');
-      });
-    });
-
-    // ===== Helpers =====
-    function saveLocal(key, obj){
-      try{ localStorage.setItem(key, JSON.stringify(obj)); }catch(_){}
-    }
-
-    // ===== Envío (validación + POST a Apps Script) =====
+    // Scroll suave al primer campo inválido (mejor UX en móvil)
     document.getElementById('naviForm').addEventListener('submit', async (e)=>{
+      const f = e.target;
+      if (!f.checkValidity()) {
+        e.preventDefault();
+        const bad = f.querySelector(':invalid');
+        if (bad) bad.scrollIntoView({behavior:'smooth', block:'center'});
+        return;
+      }
+
       e.preventDefault();
-      const fd = new FormData(e.target);
+      const fd = new FormData(f);
+      const data = {};
+      fd.forEach((v,k)=> data[k] = v);
 
-      const nombre = (fd.get('nombre')||'').toString().trim();
-      const edad   = Number(fd.get('edad'));
-      if(!nombre){ alert('Pon un nombre'); return; }
-      if(!edad || edad < 18){ alert('Debes ser mayor de 18'); return; }
-      if(!fd.get('preferencia')){ alert('Selecciona tu preferencia'); return; }
-      if(!fd.get('buscas')){ alert('Selecciona qué buscas'); return; }
-
-      const data = {
-        nombre,
-        edad,
-        preferencia: fd.get('preferencia'),
-        buscas: fd.get('buscas'),
-        definicion: (fd.get('definicion')||'').toString().trim(),
-        estudios: (fd.get('estudios')||'').toString().trim(),
-        preferencias: (fd.get('preferencias')||'').toString().trim(),
-        crush: (fd.get('crush')||'').toString().trim(),
-        hobbies: (fd.get('hobbies')||'').toString().trim(),
-        createdAt: Date.now()
-      };
-
-      // Guarda local (opcional)
-      saveLocal('navimatch_respuestas', data);
+      // Construye x-www-form-urlencoded (evita preflight CORS)
+      const params = new URLSearchParams();
+      Object.entries(data).forEach(([k,v]) => params.append(k, String(v ?? '')));
+      params.append('createdAt', String(Date.now()));
+      params.append('origin', location.origin);
 
       const btn = document.getElementById('submitBtn');
-      if (btn) { btn.disabled = true; btn.textContent = 'Enviando…'; }
+      const okMsg = document.getElementById('okMsg');
+      btn.disabled = true; btn.textContent = 'Enviando…';
 
       try{
-        const res = await fetch(AS_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify(data)
+        const res  = await fetch(AS_ENDPOINT, {
+          method:'POST',
+          headers:{ 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
+          body: params.toString()
         });
-        const json = await res.json().catch(()=>({}));
-        if (!res.ok || !json.ok) throw new Error(json.error || 'Error en envío');
+        const text = await res.text();
+        // intenta parsear JSON {ok:true}
+        let json = {};
+        try { json = JSON.parse(text); } catch {}
 
-        if (btn) btn.textContent = '¡Enviado!';
-        // Redirigir después del envío (ajusta si quieres)
-        setTimeout(()=>{ window.location.href = 'app.html'; }, 900);
-      }catch(err){
+        if (!res.ok || !json.ok) throw new Error(text || ('HTTP ' + res.status));
+
+        btn.textContent = '¡Enviado!';
+        okMsg.classList.remove('hidden');
+        // Redirige si quieres:
+        // setTimeout(()=> window.location.href='app.html', 1000);
+      } catch(err){
         console.error(err);
-        alert('No se pudo enviar el correo ahora. Inténtalo de nuevo en unos minutos.');
-        if (btn) { btn.disabled = false; btn.textContent = 'Enviar respuestas'; }
+        alert('❌ No se pudo enviar el formulario. Inténtalo en unos minutos.');
+        btn.disabled = false; btn.textContent = 'Enviar respuestas';
       }
     });
   </script>
